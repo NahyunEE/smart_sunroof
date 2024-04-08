@@ -18,6 +18,8 @@ class Moter: public Device_driver{
         void run();
         int ismax();
         int ismin();   
+        void openmax();
+        void closemin();
 };
 
 

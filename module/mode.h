@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "device_module.h"
-
+#include "state_sensor.h"
 
 
 class MainController{
@@ -30,11 +30,15 @@ class Usermode: public Mode{
 };
 
 class Cleanmode: public Mode{
+    private:
+        Sensordata * sensor;
     public:
     void run(Moter *);
 };
 
 class Brightmode: public Mode{
+    private:
+        Sensordata * sensor;
     public:
     void run(Moter *,Moter *);
 };

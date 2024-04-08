@@ -3,9 +3,7 @@
 class State{
     private:
         uint8_t modestate;
-        uint8_t glassstate;
         bool safestate;
-        uint8_t screenstate;
 
     public:
         bool issafety();
@@ -32,5 +30,3 @@ class Sensordata{
         void modifylength(uint32_t);
         void modifywater(uint32_t);
 };
-
-`
