@@ -15,10 +15,10 @@
 #define USER_DRIVER "GlassMotorDriver"
 #define WRITE_BUFFER_SIZE 10
 #define DRIVER_NUM 100
-#define GPIO_0 (25) 
-#define GPIO_1 (8) 
-#define GPIO_2 (7) 
-#define GPIO_3 (1) 
+#define GPIO_0 (12) 
+#define GPIO_1 (16) 
+#define GPIO_2 (20) 
+#define GPIO_3 (21) 
 #define FORWARD 2
 #define BACKWARD 4
 #define STOP 1
@@ -75,12 +75,12 @@ enum hrtimer_restart my_hrtimer_callback(struct hrtimer* timer) {
     }
     else if (direction == FORWARD) {  //Forward
         current_step = (current_step + 1) % 4;
-        if (current_step == 0) { pr_info("Current direction: FORWARD, Current step: %d\n", current_step); }
+      //  if (current_step == 0) { pr_info("Current direction: FORWARD, Current step: %d\n", current_step); }
         //current_step = (current_step - 1 + 4) % 4; 
     }
     else if (direction == BACKWARD) { //Backward
         current_step = (current_step - 1 + 4) % 4;
-        if (current_step == 0) { pr_info("Current direction: BACKWARD, Current step: %d\n", current_step); }
+       // if (current_step == 0) { pr_info("Current direction: BACKWARD, Current step: %d\n", current_step); }
     }
     // Set the motor pins for the current step
     set_motor_pins(current_step);
@@ -262,4 +262,4 @@ module_exit(motor_device_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Nahyun");
 MODULE_DESCRIPTION("Motor Control Device Driver");
-MODULE_VERSION("1.1");
+MODULE_VERSION("2.0");
