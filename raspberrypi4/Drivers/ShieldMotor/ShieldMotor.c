@@ -17,10 +17,10 @@
 #define USER_DRIVER "ShieldMotorDriver"
 #define DRIVER_NUM 200
 
-#define GPIO_0 (12) 
-#define GPIO_1 (16) 
-#define GPIO_2 (20) 
-#define GPIO_3 (21) 
+#define GPIO_0 (24) 
+#define GPIO_1 (25) 
+#define GPIO_2 (8) 
+#define GPIO_3 (1) 
 
 #define FORWARD 2
 #define BACKWARD 4
@@ -47,7 +47,7 @@ static void set_motor_pins(int step);
 static void timer_callback(struct timer_list *t);
 
 
-static struct timer_list timer;
+static struct hrtimer hr_timer;
 static int current_step = 0;
 static int direction = STOP; 
 
@@ -68,37 +68,41 @@ static int step_sequence[4][4] = {
 };
 
 
-static void set_motor_pins(int step){
-    
+static void set_motor_pins(int step) {
+
     gpio_set_value(GPIO[0], step_sequence[step][0]);
     gpio_set_value(GPIO[1], step_sequence[step][1]);
     gpio_set_value(GPIO[2], step_sequence[step][2]);
     gpio_set_value(GPIO[3], step_sequence[step][3]);
 }
-
-static void timer_callback(struct timer_list *t){
+enum hrtimer_restart my_hrtimer_callback(struct hrtimer* timer) {
     // Update the step based on the direction
-    if(direction == STOP) {
-        gpio_set_value(GPIO[0],0);
-        gpio_set_value(GPIO[1],0);
-        gpio_set_value(GPIO[2],0);
-        gpio_set_value(GPIO[3],0);
-    } else if(direction == FORWARD) {  //Forward
-        current_step = (current_step + 1) % 4;
-
-    }else if(direction == BACKWARD){ //Backward
-        current_step = (current_step - 1 + 4) % 4; 
+    if (direction == STOP) {
+        gpio_set_value(GPIO[0], 0);
+        gpio_set_value(GPIO[1], 0);
+        gpio_set_value(GPIO[2], 0);
+        gpio_set_value(GPIO[3], 0);
     }
-
+    else if (direction == FORWARD) {  //Forward
+        current_step = (current_step + 1) % 4;
+       // if (current_step == 0) { pr_info("Current direction: FORWARD, Current step: %d\n", current_step); }
+        //current_step = (current_step - 1 + 4) % 4; 
+    }
+    else if (direction == BACKWARD) { //Backward
+        current_step = (current_step - 1 + 4) % 4;
+      //  if (current_step == 0) { pr_info("Current direction: BACKWARD, Current step: %d\n", current_step); }
+    }
     // Set the motor pins for the current step
     set_motor_pins(current_step);
 
+
+
     // Reschedule the timer for the next step
-    mod_timer(&timer, jiffies + msecs_to_jiffies(5));
-
-
+    //mod_timer(&timer, jiffies + usecs_to_jiffies(0));
+    ktime_t interval = ktime_set(0, 3E6);
+    hrtimer_forward(timer, hrtimer_cb_get_time(timer), interval);
+    return HRTIMER_RESTART;
 }
-
 
 
 
@@ -118,31 +122,27 @@ static ssize_t motor_read(struct file *filp, char __user *buf, size_t len, loff_
     return 0;
 }
 
-static ssize_t motor_write(struct file *flip, const char __user *buf, size_t len, loff_t *off){
-
-    uint8_t _buf[WRITE_BUFFER_SIZE] = {0};
+static ssize_t motor_write(struct file* flip, const char __user* buf, size_t len, loff_t* off) {
+    uint8_t _buf[WRITE_BUFFER_SIZE] = { 0 };
     size_t bytes_to_copy = min(len, sizeof(_buf));
-
-    if(copy_from_user(_buf, buf, bytes_to_copy) != 0){
-        pr_err("SHLIELD MOTOR DRIVER : Failed to copy data from user\n");
+    if (copy_from_user(_buf, buf, bytes_to_copy) != 0) {
+        pr_err("Failed to copy data from user\n");
         return -EFAULT; // Return a standard error code
     }
-
-    pr_info("SHIELD MOTOR DRIVER: Get User Signal\n");
-
-    if(_buf[0] == MOTOR_OFF){ //         
+    pr_info("Motor Diriver Get User Signal\n");
+    if (_buf[0] == MOTOR_OFF) { //         
         direction = STOP;
-    }else{
-        if(_buf[0]==MOTOR_FORWARD){
+    }
+    else {
+        if (_buf[0] == MOTOR_FORWARD) {
             direction = FORWARD;
-        }else if(_buf[0]==MOTOR_BACKWARD ){
+        }
+        else if (_buf[0] == MOTOR_BACKWARD) {
             direction = BACKWARD;
         }
     }
-     
-    
-    mod_timer(&timer, jiffies + msecs_to_jiffies(5));
 
+    //mod_timer(&timer, jiffies + msecs_to_jiffies(2));
     return bytes_to_copy; // It's more accurate to return the number of bytes actually written
 }
 
@@ -242,7 +242,9 @@ static int __init motor_driver_init(void){
     }  
 
     //Timer Setting
-    timer_setup(&timer, timer_callback, 0);
+     hrtimer_init(&hr_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    hr_timer.function = &my_hrtimer_callback;
+    hrtimer_start(&hr_timer, ktime_set(0, 3E6), HRTIMER_MODE_REL);
 
     pr_info("Motor Module Inserted Successfully\n");
     return 0;
@@ -288,7 +290,7 @@ static void __exit motor_device_exit(void){
     gpio_free(GPIO[1]);
     gpio_free(GPIO[2]);
     gpio_free(GPIO[3]);
-    del_timer(&timer);
+     hrtimer_cancel(&hr_timer);
 
     device_destroy(dev_class,dev);
     class_destroy(dev_class);
@@ -302,5 +304,5 @@ module_exit(motor_device_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Nahyun");
-MODULE_DESCRIPTION("Motor Control Device Driver");
-MODULE_VERSION("1.0");
+MODULE_DESCRIPTION("Shield Motor Control Device Driver");
+MODULE_VERSION("2.0");
