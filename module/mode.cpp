@@ -1,36 +1,106 @@
 #include "mode.h"
 
-while (1) {
+template <typename T>
+void MainController::moderun(T * mode){
+    mode->run();
+}
+
+bool MainController::isdrive(){
+    return drive;
+}
+
+void MainController::modifydrive(){
+    ;
+}
 
 
-    // 채광모드 //
-    sensorBrightness = getbright();
-    userBrightness = modifyuserbright();  //가변저항에 의한 센서(가변저항 입력)
 
-    if (brightModeSwitch) { // 밝기 모드가 활성화되어 있을 때
-        if (userBrightness >= sensorBrightness) {
-            if (ismax()) {
-                break; // 모터 정지
-            }
-            else {
-                if (motorState != open()) {
-                    openmax(); // 모터 열기
-                    motorState = open();
-                }
+void Usermode::run(Device_controller * dc){
+    if(dc->glass_opswtich->read()!=NOT_PUSH){
+        if(dc->glass_moter->ismax()){
+            dc->glass_moter->run(0);
+            if(dc->glass_opswtich->read()==PUSH){
+            dc->glass_opswtich->modifystate(NOT_PUSH);
             }
         }
-        else {
-            if (ismin()) {
-                break; // 
-            }
-            else {
-                if (motorState != open()) {
-                    closemin(); // 모터 닫기  close min 이상함
-                    motorState = open();
-                }
-            }
+        else{
+            dc->glass_moter->run(1);
         }
     }
+    if(dc->glass_clswtich->read()!=NOT_PUSH){
+        if(dc->glass_moter->ismin()){
+            dc->glass_moter->run(0);
+            if(dc->glass_clswtich->read()==PUSH){
+            dc->glass_clswtich->modifystate(NOT_PUSH);
+            }
+        }
+        else{
+            dc->glass_moter->run(-1);
+        }
+    }
+    if(dc->blind_opswtich->read()!=NOT_PUSH){
+        if(dc->glass_moter->ismax()){
+            dc->glass_moter->run(0);
+            if(dc->blind_opswtich->read()==PUSH){
+            dc->blind_opswtich->modifystate(NOT_PUSH);
+            }
+        }
+        else{
+            dc->glass_moter->run(1);
+        }
+    }
+    if(dc->blind_clswtich->read()!=NOT_PUSH){
+        if(dc->glass_moter->ismin()){
+            dc->glass_moter->run(0);
+            if(dc->blind_clswtich->read()==PUSH){
+            dc->blind_clswtich->modifystate(NOT_PUSH);
+            }
+        }
+        else{
+            dc->glass_moter->run(-1);
+        }
+    }
+    
 
-    updateMotorState(); // 모터의 상태를 주기적으로 업데이트
+}
+
+void Cleanmode::run(Device_controller * dc,Sensordata * sensor){
+    if(!(dc->glass_moter->ismin())){
+        dc->glass_moter->run(-1);
+    }
+    else if(sensor->getoutdust() > outdustthresh ){
+        if(dc->tilting_moter->ismin()){
+            dc->tilting_moter->run(0);
+        }
+        else{
+            dc->tilting_moter->run(-1);
+        }
+    }
+    else if(sensor->getindust() > industthresh || sensor->gettemper() > temperthresh){
+        if(dc->tilting_moter->ismax()){
+            dc->tilting_moter->run(0);
+        }
+        else{
+            dc->tilting_moter->run(1);
+        }
+    }
+}
+
+void Brightmode::run(Device_controller * dc,Sensordata * sensor){
+    if(sensor->getbright() < userbright ){
+        if(dc->blind_moter->ismax()){
+            dc->blind_moter->run(0);
+        }
+        else{
+            dc->blind_moter->run(1);
+        }
+    }
+    else{
+        if(dc->blind_moter->ismin()){
+            dc->blind_moter->run(0);
+        }
+        else{
+            dc->blind_moter->run(-1);
+        }
+    }
 }
