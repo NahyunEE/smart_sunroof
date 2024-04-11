@@ -104,4 +104,3 @@ void Brightmode::run(Device_controller * dc,Sensordata * sensor){
         }
     }
 }
-
