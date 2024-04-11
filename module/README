@@ -4,7 +4,7 @@ Step1. Install WirngPi
 
 1. 'sudo apt-get update' 로 라즈베리 파이 업데이트
 
-2. 'git clone https://github.com/WirngPi/WirinPi' 로 WirinPi 다운로드
+2. 'git clone https://github.com/WirngPi/WiringPi' 로 WirinPi 다운로드
 
 3. 'cd WiringPi'로 디렉토리 변경
 
@@ -12,5 +12,3 @@ Step1. Install WirngPi
 
 5. 'gpio -v'로 라이브러 설치 성공 유무 판단
 
-
-Step2. 
