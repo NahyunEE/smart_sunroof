@@ -39,6 +39,31 @@ class Sensordata{
         void modifywater(uint32_t);
 };
 
+uint32_t getbright()
+{
+    return bright;
+}
+
+uint32_t gettempper()
+{
+    return temper;
+}
+
+uint32_t getdust()
+{
+    return dust;
+}
+
+uint32_t getlength()
+{
+    return length;
+}
+
+uint32_t getwater()
+{
+    return water;
+}
+
 void Sensordata::modifybright(uint32_t)
 {
     wiringPiI2CWrite(fd, Bright_Header);
