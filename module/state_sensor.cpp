@@ -2,6 +2,7 @@
 #include <errno.h>  
 #include <wiringPiI2C.h> 
 #include "state_sensor.h"
+#include "device_module.h"
 
 #define Water_Header 110
 #define Temper_Header 120
@@ -12,14 +13,33 @@
 
 
 uint8_t State::getmodestate(){
+    this.modifymodestate();
     return modestate;
 }
-
+void State::updatedata(){
+    modifyvalue(Water_Header);
+    modifyvalue(Temper_Header);
+    modifyvalue(Dust_Header);
+    modifyvalue(Bright_Header);
+    ///// TODO :: modifyvalue(Water_Header);
+}
 bool State::issafety(){
     return this.safestate
 }
 
-void State::modifysafestate(){
+void State::modifymodestate(Device_controller * dc){
+    if(dc->blmd_swtich){
+        modestate = 1;
+    }
+    else if(dc->clmd_switch){
+        modestate = 2;
+    }
+    else{
+        modestate = 0;
+    }
+}
+
+void State::modifysafestate(Sensordata *sensor){
     if(sensor->getwater()){
         this.safestate = 0;
     }

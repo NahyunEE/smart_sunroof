@@ -11,9 +11,7 @@ class MainController{
     public:
         template <typename T>
         void moderun(T *mode);
-        uint16_t getuserbright();
         bool isdrive();
-        uint16_t getspeed();
         void modifydrive();
 };
 

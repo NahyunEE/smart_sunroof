@@ -4,14 +4,13 @@ class State{
     private:
         uint8_t modestate;
         bool safestate;
-        Sensordata * sensor;
         uint32_t lengthresh;
         uint32_t speedthresh;
-
     public:
         bool issafety();
-        void modifysafestate();
+        void modifysafestate(Sensordata *);
         uint8_t getmodestate();
+        void modifymodestate();
 };
 
 class Sensordata{
@@ -37,5 +36,6 @@ class Sensordata{
         uint32_t getuserbright();
         void modifyuserbright();
         void modifyspeed();
+        void updatedata();
         void modifyvalue(uint32_t);
 };

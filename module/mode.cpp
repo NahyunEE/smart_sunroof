@@ -8,11 +8,9 @@ void MainController::moderun(T * mode){
 bool MainController::isdrive(){
     return drive;
 }
-uint16_t MainController::getspeed(){
-    return speed;
-}
-void MainController::modifydrive(){
 
+void MainController::modifydrive(){
+    ;
 }
 
 
