@@ -1,8 +1,11 @@
 #include "mode.h"
 
 while (1) {
+
+
+    // 채광모드 //
     sensorBrightness = getbright();
-    userBrightness = modifyuserbright();  //가변저항에 의한 센서
+    userBrightness = modifyuserbright();  //가변저항에 의한 센서(가변저항 입력)
 
     if (brightModeSwitch) { // 밝기 모드가 활성화되어 있을 때
         if (userBrightness >= sensorBrightness) {
@@ -10,9 +13,9 @@ while (1) {
                 break; // 모터 정지
             }
             else {
-                if (motorState != MOTOR_OPENING) {
+                if (motorState != open()) {
                     openmax(); // 모터 열기
-                    motorState = MOTOR_OPENING;
+                    motorState = open();
                 }
             }
         }
@@ -21,9 +24,9 @@ while (1) {
                 break; // 
             }
             else {
-                if (motorState != MOTOR_CLOSING) {
+                if (motorState != open()) {
                     closemin(); // 모터 닫기  close min 이상함
-                    motorState = MOTOR_CLOSING;
+                    motorState = open();
                 }
             }
         }
