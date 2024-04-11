@@ -1,22 +1,20 @@
 #include <stdint.h>
 #include "device_module.h"
 #include "state_sensor.h"
-
+#define USERMODE 0
+#define CLEANMODE 1
+#define BRIGHTMODE 2
 
 class MainController{
     private:
         bool drive;
-        uint16_t userbright;
-        uint16_t speed;
-
     public:
-        void moderun(Mode *mode);
+        template <typename T>
+        void moderun(T *mode);
         uint16_t getuserbright();
         bool isdrive();
         uint16_t getspeed();
         void modifydrive();
-        void modifyuserbright();
-        void modifyspeed();
 };
 
 class Mode{
@@ -26,21 +24,23 @@ class Mode{
 
 class Usermode: public Mode{
     public:
-    void run(Moter *,Moter *);
+    void run(Device_controller * dc);
 };
 
 class Cleanmode: public Mode{
     private:
-        Sensordata * sensor;
+        uint32_t industthresh;
+        uint32_t outdustthresh;
+        uint32_t temperthresh;
     public:
-    void run(Moter *);
+    void run(Device_controller * dc, Sensordata * sensor);
 };
 
 class Brightmode: public Mode{
     private:
-        Sensordata * sensor;
+        uint32_t userbright;
     public:
-    void run(Moter *,Moter *);
+    void run(Device_controller * dc,Sensordata * sensor);
 };
 
 

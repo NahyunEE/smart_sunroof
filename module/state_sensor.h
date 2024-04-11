@@ -4,29 +4,38 @@ class State{
     private:
         uint8_t modestate;
         bool safestate;
+        Sensordata * sensor;
+        uint32_t lengthresh;
+        uint32_t speedthresh;
 
     public:
         bool issafety();
         void modifysafestate();
+        uint8_t getmodestate();
 };
 
 class Sensordata{
     private:
         uint32_t bright;
         uint32_t temper;
-        uint32_t dust;
+        uint32_t indust;
+        uint32_t outdust;
         uint32_t length;
         uint32_t water;
+        uint32_t speed;
+        uint32_t userbright;
+        int fd;
     public:
-        void update(uint32_t,uint32_t,uint32_t,uint32_t,uint32_t);
+        Sensordata(int fd_ad);
         uint32_t getbright();
-        uint32_t gettempper();
-        uint32_t getdust();
+        uint32_t gettemper();
+        uint32_t getindust();
+        uint32_t getoutdust();
         uint32_t getlength();
         uint32_t getwater();
-        void modifybright(uint32_t);
-        void modifytemper(uint32_t);
-        void modifydust(uint32_t);
-        void modifylength(uint32_t);
-        void modifywater(uint32_t);
+        uint32_t getspeed();
+        uint32_t getuserbright();
+        void modifyuserbright();
+        void modifyspeed();
+        void modifyvalue(uint32_t);
 };
