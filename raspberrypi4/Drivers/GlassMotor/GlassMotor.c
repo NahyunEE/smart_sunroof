@@ -29,6 +29,7 @@ static int GPIO[4] = { GPIO_0, GPIO_1, GPIO_2 , GPIO_3 };
 dev_t dev = DRIVER_NUM; // MAJOR, MINOR 번호 저장
 static struct class* dev_class;
 static struct cdev motor_cdev;
+static int count_Glass=0;
 
 //Function Prototype
 static int __init motor_driver_init(void);
@@ -72,18 +73,38 @@ enum hrtimer_restart my_hrtimer_callback(struct hrtimer* timer) {
         gpio_set_value(GPIO[1], 0);
         gpio_set_value(GPIO[2], 0);
         gpio_set_value(GPIO[3], 0);
+        
     }
     else if (direction == FORWARD) {  //Forward
+        if(count_Glass < 8192){
         current_step = (current_step + 1) % 4;
+        count_Glass++;}else{
+        gpio_set_value(GPIO[0], 0);
+        gpio_set_value(GPIO[1], 0);
+        gpio_set_value(GPIO[2], 0);
+        gpio_set_value(GPIO[3], 0);   
+        }
+
       //  if (current_step == 0) { pr_info("Current direction: FORWARD, Current step: %d\n", current_step); }
         //current_step = (current_step - 1 + 4) % 4; 
     }
     else if (direction == BACKWARD) { //Backward
+        if(count_Glass >0){
+        count_Glass--;
         current_step = (current_step - 1 + 4) % 4;
+        }else{
+        gpio_set_value(GPIO[0], 0);
+        gpio_set_value(GPIO[1], 0);
+        gpio_set_value(GPIO[2], 0);
+        gpio_set_value(GPIO[3], 0);
+        }
+      
        // if (current_step == 0) { pr_info("Current direction: BACKWARD, Current step: %d\n", current_step); }
     }
     // Set the motor pins for the current step
     set_motor_pins(current_step);
+
+
 
 
 
@@ -96,17 +117,25 @@ enum hrtimer_restart my_hrtimer_callback(struct hrtimer* timer) {
 
 
 static int motor_open(struct inode* inode, struct file* file) {
-    pr_info("DRIVER OPEN");
+    count_Glass =0 ;
+    direction = STOP;
+    
     return 0;
 }
 static int motor_release(struct inode* inode, struct file* file) {
-    pr_info("DRIVER RELEASE\n");
+    
+    pr_info("Glass DRIVER RELEASE\n");
+
+   
+
     return 0;
 }
 static ssize_t motor_read(struct file* filp, char __user* buf, size_t len, loff_t* off) {
 
-    pr_info("DRIVER READ\n");
-    return 0;
+    
+    pr_info("");
+   
+    return 0 ;
 }
 
 static ssize_t motor_write(struct file* flip, const char __user* buf, size_t len, loff_t* off) {
@@ -123,19 +152,24 @@ static ssize_t motor_write(struct file* flip, const char __user* buf, size_t len
     else {
         if (_buf[0] == MOTOR_FORWARD) {
             direction = FORWARD;
+           
         }
         else if (_buf[0] == MOTOR_BACKWARD) {
             direction = BACKWARD;
+           
         }
+
+       
     }
 
     //mod_timer(&timer, jiffies + msecs_to_jiffies(2));
-    return bytes_to_copy; // It's more accurate to return the number of bytes actually written
+    return count_Glass; // It's more accurate to return the number of bytes actually written
 }
 
 
 static int __init motor_driver_init(void) {
     int i;
+
     //Allocate Device MAJOR Number
     if ((alloc_chrdev_region(&dev, 0, 1, USER_DRIVER)) < 0) {
         pr_err("Cannot allocate major number for Motor Driver\n");
@@ -208,7 +242,7 @@ static int __init motor_driver_init(void) {
     //Timer Setting
     //timer_setup(&timer, timer_callback, 0);
 
-// 
+ 
     hrtimer_init(&hr_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
     hr_timer.function = &my_hrtimer_callback;
     hrtimer_start(&hr_timer, ktime_set(0, 3E6), HRTIMER_MODE_REL);
@@ -262,4 +296,4 @@ module_exit(motor_device_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Nahyun");
 MODULE_DESCRIPTION("Motor Control Device Driver");
-MODULE_VERSION("2.0");
+MODULE_VERSION("1.1");
