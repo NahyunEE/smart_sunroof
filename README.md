@@ -30,7 +30,7 @@ Click to see Demonstration
 ![소프트웨어 아키텍쳐](https://github.com/DongjinSun/smart_sunroof/assets/50420981/d2f7f5bf-e18c-47c1-ad98-0e4b9cb5ccab)
 
 # License
-MIT License
+GPU GPL 
 
 
 
