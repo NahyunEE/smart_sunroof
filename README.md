@@ -17,7 +17,7 @@
 
 [![시연 영상](https://img.youtube.com/vi/Q2zuCXH4hZc/0.jpg)](https://www.youtube.com/watch?v=Q2zuCXH4hZc)
 
-클릭하여 시연 영상을 시청할 수 있습니다.
+Click to see Demonstration
 
 
 
